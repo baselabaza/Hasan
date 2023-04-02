@@ -7,6 +7,8 @@
 #
 # All rights reserved.
 
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 import random
 import string
 from ast import ExceptHandler
@@ -36,6 +38,7 @@ from YukkiMusic.utils.logger import play_logs
 from YukkiMusic.utils.stream.stream import stream
 
 
+
 force_btn = InlineKeyboardMarkup(
     [
         [
@@ -52,7 +55,7 @@ async def check_is_joined(message):
         status = await app.get_chat_member("CH_BO_T", userid)
         return True
     except Exception:
-        await message.reply_text("*انت لست مشترك في قناة البوت @ ** \n**انضم لتستطيع تشغيل الاغاني**",reply_markup=force_btn,parse_mode="markdown",disable_web_page_preview=False)
+        await message.reply_text("*انت لست مشترك في قناة البوت @CH_BO_T ** \n**انضم لتستطيع تشغيل الاغاني**",reply_markup=force_btn,parse_mode="markdown",disable_web_page_preview=False)
         return False
 
 # Command
@@ -77,6 +80,9 @@ async def play_commnd(
     url,
     fplay,
 ):
+    
+    if not await check_is_joined(message):
+        return
     mystic = await message.reply_text(
         _["play_2"].format(channel) if channel else _["play_1"]
     )
@@ -147,7 +153,6 @@ async def play_commnd(
                 )
                 return await mystic.edit_text(err)
             return await mystic.delete()
-        return
     elif video_telegram:
         if not await is_video_allowed(message.chat.id):
             return await mystic.edit_text(_["play_3"])
@@ -197,7 +202,6 @@ async def play_commnd(
                 )
                 return await mystic.edit_text(err)
             return await mystic.delete()
-        return
     elif url:
         if await YouTube.exists(url):
             if "playlist" in url:
@@ -378,7 +382,7 @@ async def play_commnd(
                     chat_id,
                     message.from_user.first_name,
                     message.chat.id,
-                    video=video,
+                    video=True,
                     streamtype="index",
                     forceplay=fplay,
                 )
@@ -429,7 +433,6 @@ async def play_commnd(
                     user_id,
                     "v" if video else "a",
                     "c" if channel else "g",
-                    "f" if fplay else "d",
                 )
                 return await mystic.edit_text(
                     _["play_15"],
@@ -573,7 +576,6 @@ async def play_music(client, CallbackQuery, _):
             CallbackQuery.from_user.id,
             mode,
             "c" if cplay == "c" else "g",
-            "f" if fplay else "d",
         )
         return await mystic.edit_text(
             _["play_15"],
